@@ -1,0 +1,88 @@
+Заполняем три таблицы случайными данными. Важно при создании таблицы Purchases при заполнее полей userid itemid использовать  диапозон чисел который не нарушает  целостность данных (в диапазоне двуз первых таблиц).
+_______________________________________________________________________________________________________________________
+
+A. User table
+
+CREATE OR REPLACE FUNCTION random_between(low INT ,high INT) 
+   RETURNS INT AS
+$$
+BEGIN
+   RETURN floor(random()* (high-low + 1) + low);
+END;
+$$ language 'plpgsql' STRICT;
+
+
+do $$
+declare
+   n integer:= 200;
+   rnd integer:= 0;
+   counter integer := 0 ; 
+begin
+	loop 
+    exit when counter = n ; 
+	counter := counter + 1 ;
+    rnd := random_between(14,80);
+    INSERT INTO Users VALUES(DEFAULT,rnd);
+	end loop; 
+	
+end; $$
+_______________________________________________________________________________________________________________________
+B. Items table 
+
+CREATE OR REPLACE FUNCTION random_between(low INT ,high INT) 
+   RETURNS INT AS
+$$
+BEGIN
+   RETURN floor(random()* (high-low + 1) + low);
+END;
+$$ language 'plpgsql' STRICT;
+
+
+do $$
+declare
+   n integer:= 400;
+   rnd integer:= 0;
+   counter integer := 0 ; 
+begin
+	loop 
+    exit when counter = n ; 
+	counter := counter + 1 ;
+    rnd := random_between(100,5000);
+    INSERT INTO Items VALUES(DEFAULT,rnd);
+	end loop; 
+	
+end; $$
+_______________________________________________________________________________________________________________________
+
+C. Purchases
+
+CREATE OR REPLACE FUNCTION random_between(low INT ,high INT) 
+   RETURNS INT AS
+$$
+BEGIN
+   RETURN floor(random()* (high-low + 1) + low);
+END;
+$$ language 'plpgsql' STRICT;
+
+
+do $$
+declare
+   n integer:= 2000;
+   rnd_usr integer:= 0;
+   rnd_itm integer:= 0;
+   rnd_date DATE:= '2014-01-20 20:00:00';
+   counter integer := 0 ; 
+
+begin
+	loop 
+    exit when counter = n ; 
+	counter := counter + 1 ;
+    rnd_usr := random_between(1,200);
+    rnd_itm := random_between(1,400);
+    rnd_date= cast( now() - '3 year'::interval * random()  as date );
+    INSERT INTO Purchases VALUES(DEFAULT,rnd_usr,rnd_itm,rnd_date);
+	end loop; 
+   
+	
+end; $$
+_______________________________________________________________________________________________________________________

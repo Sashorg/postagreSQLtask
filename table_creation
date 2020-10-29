@@ -1,0 +1,17 @@
+ 
+1) Создание таблиц
+CREATE TABLE Users(
+   userId SERIAL PRIMARY KEY     NOT NULL,
+   AGE            INT     NOT NULL
+);
+CREATE TABLE Items(
+   itemId SERIAL PRIMARY KEY     NOT NULL,
+   PRICE           INT     NOT NULL
+);
+CREATE TABLE Purchases(
+   purchaseId SERIAL PRIMARY KEY NOT NULL,
+   userId integer REFERENCES users(userId),
+   itemId integer REFERENCES items(itemId),
+   dates DATE NOT NULL DEFAULT CURRENT_DATE
+);
+ 

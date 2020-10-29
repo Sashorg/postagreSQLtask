@@ -1,0 +1,65 @@
+Четвертая задача
+_____________________________________________________________________________________________
+Очень похожа на третью, но с дополнительными сравнениями и возращением SETOF.
+_____________________________________________________________________________________________
+
+CREATE OR REPLACE FUNCTION get_money(j INTEGER,y INTEGER) RETURNS INT AS
+$$
+DECLARE
+	i record;
+    r INTEGER :=0;
+    res INTEGER :=0;
+BEGIN
+SELECT sum(price) into res from purchases INNER join items on purchases.itemid=items.itemid INNER Join users on purchases.userid=users.userid where purchases.itemid=j and EXTRACT(year from dates)=y;
+RETURN res;
+END
+$$
+language 'plpgsql';
+
+_____________________________________________________________________________________________
+CREATE OR REPLACE FUNCTION get_txt2(y INTEGER) RETURNS SETOF TEXT AS
+$$
+DECLARE
+	top1 INTEGER :=0;
+    top2 INTEGER :=0;
+    top3 INTEGER :=0;
+    top1_ind INTEGER :=0;
+    top2_ind INTEGER :=0;
+    top3_ind INTEGER :=0;
+	i record;
+    r INTEGER :=0;
+	total_spend INTEGER :=0;
+    cur INTEGER :=0;
+BEGIN
+SELECT sum(price) into total_spend from purchases INNER join items on items.itemid=purchases.itemid where EXTRACT(year from dates)=y;
+FOR i IN SELECT itemid FROM items
+LOOP
+	
+    cur := get_money(i.itemId,y);
+    
+    IF cur > top1
+	THEN
+    top1=cur;
+    top1_ind=i.itemId;
+    ELSIF cur > top2
+    THEN
+	top2=cur;
+    top2_ind=i.itemId;
+    ELSIF cur > top3
+    THEN
+	top3=cur;
+    top3_ind=i.itemId;
+    
+	END IF;
+END LOOP;
+	 IF total_spend  is NULL
+	 THEN
+     RETURN QUERY SELECT 'Please, enter valid year' ;
+     else		
+	 RETURN QUERY SELECT 'top 1 is ' || CAST(top1_ind as TEXT) || ' with % ' || CAST(((top1::float/total_spend::float)*100) as TEXT) || ' from total spend in this year' UNION all SELECT 'top 2 is ' || CAST(top2_ind as TEXT) || ' with % ' || CAST(((top2::float/total_spend::float)*100) as TEXT) || ' from total spend in this year' UNION ALL SELECT 'top 3 is ' || CAST(top3_ind as TEXT) || ' with % ' || CAST(((top3::float/total_spend::float)*100) as TEXT) || ' from total spend in this year' ;
+	 END IF;
+END
+$$
+language 'plpgsql';
+_____________________________________________________________________________________________
+SELECT get_txt2(2020);

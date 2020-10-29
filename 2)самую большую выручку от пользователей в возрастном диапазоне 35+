@@ -1,0 +1,47 @@
+
+ВТОРАЯ ЗАДАЧА:
+_______________________________________________________________________________________________________________________
+Формула такова: одна функция итеририет каждый месяц и вызывает основную функцию сравнивая ее выходные данные с максимальным на данный момент значением. Если значение больше максимального, макс обновляется. В основной функции мы находим для каждого месяца количество лет и прибыль которую он принес и возвращаем деление.
+По случайному стечению обстоятельств, в данном наборе данных который я использовал количество лет на каждый месяц одинаковый и равняется 3. Но  так как БД обычно динамические мы должны контролировать данную ситуацию. И в ходе расчета общей выручки мы разделим сумму каждого месяца на количество лет в котором данных месяц появляются.
+_______________________________________________________________________________________________________________________
+CREATE OR REPLACE FUNCTION sum_price(n INTEGER) 
+   RETURNS INT AS $$
+   
+declare
+  res integer:= 0;
+  yrs integer:= 0;
+begin 
+		SELECT Count( DISTINCT extract(year from dates) ) into yrs from purchases INNER join items on items.itemid=purchases.itemid INNER JOIN users on users.userid=purchases.userid where  extract(Month from dates) =12;
+		SELECT sum(price) into res from purchases INNER join items on items.itemid=purchases.itemid INNER JOIN users on users.userid=purchases.userid where age >34 and extract(Month from dates) =n; 
+    RETURN res/yrs;
+	
+end; $$
+language 'plpgsql';
+
+_______________________________________________________________________________________________________________________
+
+CREATE OR REPLACE FUNCTION sums() 
+   RETURNS INT AS $$
+declare
+   n integer:= 12;
+   maxi integer:= 0;
+   maxi_ind integer:= 0;
+   currents integer:= 0;
+   counter integer := 0 ; 
+begin
+	loop 
+    exit when counter = n ; 
+	counter := counter + 1 ;
+    currents := sum_price(counter);
+    IF currents > maxi
+	THEN
+    maxi=currents;
+    maxi_ind=counter;
+	END IF;
+	end loop; 
+    RETURN maxi_ind;
+end; $$
+language 'plpgsql' ;
+_______________________________________________________________________________________________________________________
+SELECT sums();
+  	
